@@ -7,7 +7,7 @@ To run this application using docker-compose, run the following commands in the 
 ```
 $ docker compose up
 $ cd src/AuthManager.Persistence
-$ dotnet ef --startup-project ../AuthManager.WebAPI/ database update --connection "Server=sqlserver_dev;Database=IdentityDb;User Id=SA;Password=Pass@word;Integrated security=False;TrustServerCertificate=True;"
+$ dotnet ef --startup-project ../AuthManager.WebAPI/ database update --connection "Server=localhost\sqlserver_dev,5434;Database=IdentityDb;User Id=SA;Password=Pass@word;Integrated security=False;TrustServerCertificate=True;"
 $ cd ../..
 $ docker compose run webapi_dev
 ```
