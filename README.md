@@ -13,7 +13,7 @@ $ docker compose run webapi_dev
 ```
 
 Now you can access the application at `localhost:5000/swagger/index.html`. 
-To authenticate, you can use the admin account that was created with the migration by passing the following credentials to the `POST api/auth/login` route's body:
+To get authenticated, you can use the admin account that was created with the migration by passing the following credentials to the `POST api/auth/login` route's body:
 ```
 {
   "email": "admin@admin.com",
