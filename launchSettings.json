@@ -1,0 +1,14 @@
+{
+  "profiles": {
+    "Development": {
+      "commandName": "DockerCompose",
+      "commandVersion": "1.0",
+      "serviceActions": {
+        "sqlserver_dev": "StartWithoutDebugging",
+        "webapi_dev": "StartDebugging"
+      },
+      "composeLaunchAction": "LaunchBrowser",
+      "composeLaunchUrl": "{Scheme}://localhost:{ServicePort}"
+    }
+  }
+}

@@ -1,0 +1,27 @@
+version: '3.4'
+
+services:
+  sqlserver_dev:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver_dev
+    environment:
+      - MSSQL_SA_PASSWORD=Pass@word
+      - ACCEPT_EULA=Y
+    ports:
+      - "5434:1433"
+
+  webapi_dev:
+    image: webapi
+    container_name: webapi_dev
+    build:
+      dockerfile: src/AuthManager.WebAPI/Dockerfile
+      args:
+        - configuration=Debug
+    depends_on:
+      - sqlserver_dev    
+    ports:
+      - 5000:80
+      - 5001:443   
+    volumes:
+      - ~/.vsdbg:/remote_debugger:rw
+      - ~/.aspnet/https:/https:ro

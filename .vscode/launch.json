@@ -1,0 +1,77 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Development",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "console": "integratedTerminal",
+            "program": "${workspaceFolder}/src/AuthManager.WebAPI/bin/Debug/net7.0/AuthManager.WebAPI.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/AuthManager.WebAPI",
+            "stopAtEntry": false,
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+                "uriFormat": "%s/swagger"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "CONNECTION_STRING": "Server=localhost\\sqlserver_dev,5434;Database=IdentityDb;User Id=SA;Password=Pass@word;Integrated security=False;TrustServerCertificate=True;"
+            },
+            "sourceFileMap": {
+                "/Views": "${workspaceFolder}/Views"
+            }
+        },
+        {
+            "name": "Staging",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "console": "integratedTerminal",
+            "program": "${workspaceFolder}/src/AuthManager.WebAPI/bin/Debug/net7.0/AuthManager.WebAPI.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/AuthManager.WebAPI",
+            "stopAtEntry": false,
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+                "uriFormat": "%s/swagger"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Staging"
+			},
+            "sourceFileMap": {
+                "/Views": "${workspaceFolder}/Views"
+            }
+        },
+        {
+            "name": "Production",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "console": "integratedTerminal",
+            "program": "${workspaceFolder}/src/AuthManager.WebAPI/bin/Debug/net7.0/AuthManager.WebAPI.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/AuthManager.WebAPI",
+            "stopAtEntry": false,
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+                "uriFormat": "%s/swagger"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Production"
+			},
+            "sourceFileMap": {
+                "/Views": "${workspaceFolder}/Views"
+            }
+        },
+        {
+            "name": ".NET Core Attach",
+            "type": "coreclr",
+            "request": "attach"
+        }
+    ]
+}
