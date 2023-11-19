@@ -19,7 +19,7 @@ internal sealed class AuthService : IAuthService
 
     public string GenerateToken(User user, IEnumerable<string> userRoles)
     {
-        SymmetricSecurityKey securityKey = new(Encoding.UTF8.GetBytes(_authOptions.SecretKey));
+        SymmetricSecurityKey securityKey = new(Encoding.ASCII.GetBytes(_authOptions.SecretKey));
         SigningCredentials credentials = new(securityKey, SecurityAlgorithms.HmacSha256);
 
         var claims = new List<Claim>

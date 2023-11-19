@@ -22,10 +22,11 @@ namespace AuthManager.WebAPI.Setup
             options.SaveToken = true;
             options.TokenValidationParameters = new()
             {
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_authOptions.SecretKey)),
-                ValidateAudience = false,
-                ValidateIssuer = false,
-                ValidateIssuerSigningKey = false,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_authOptions.SecretKey)),
+                RequireSignedTokens = true,
+                ValidateAudience = true,
+                ValidateIssuer = true,
+                ValidateIssuerSigningKey = true,
                 ValidateLifetime = true,
                 ValidAudience = _authOptions.Audience,
                 ValidIssuer = _authOptions.Issuer,

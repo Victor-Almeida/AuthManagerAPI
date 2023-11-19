@@ -44,9 +44,10 @@
       "launchUrl": "swagger",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "http://localhost:5000",
         "CONNECTION_STRING": "Server=localhost\\sqlserver_dev,5434;Database=IdentityDb;User Id=SA;Password=Pass@word;Integrated security=False;TrustServerCertificate=True;"
       },
-      "applicationUrl": "https://localhost:7001;http://localhost:7000"
+      "applicationUrl": "http://localhost:5000"
     }
   },
   "$schema": "https://json.schemastore.org/launchsettings.json",

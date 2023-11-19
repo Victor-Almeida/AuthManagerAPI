@@ -7,7 +7,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             "console": "integratedTerminal",
-            "program": "${workspaceFolder}/src/AuthManager.WebAPI/bin/Debug/net7.0/AuthManager.WebAPI.dll",
+            "program": "${workspaceFolder}/src/AuthManager.WebAPI/bin/Debug/net8.0/AuthManager.WebAPI.dll",
             "args": [],
             "cwd": "${workspaceFolder}/src/AuthManager.WebAPI",
             "stopAtEntry": false,
