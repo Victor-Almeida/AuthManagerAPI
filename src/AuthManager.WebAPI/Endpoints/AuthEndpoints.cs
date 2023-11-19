@@ -2,19 +2,24 @@
 using AuthManager.Application.Auth.AuthenticateUser;
 using AuthManager.Application.ViewModels;
 using AuthManager.Domain.Primitives;
+using Carter;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AuthManager.WebAPI.Endpoints;
 
-public static class AuthEndpoints
+public class AuthEndpoints : ICarterModule
 {
-    public static void MapAuthEndpoints(this IEndpointRouteBuilder app)
+    public void AddRoutes(IEndpointRouteBuilder app)
     {
         var group = app
             .MapGroup("api/auth")
             .WithTags("Auth");
 
         group
-            .MapPost("login", async (AuthenticateUserCommand command, ISender sender) => await Login(command, sender))
+            .MapPost(
+                "login",
+                [AllowAnonymous]
+                async (AuthenticateUserCommand command, ISender sender) => await Login(command, sender))
             .WithOpenApi(operation => new(operation)
             {
                 Summary = "Authenticate user",
@@ -26,7 +31,7 @@ public static class AuthEndpoints
             .Produces<OperationResult>(StatusCodes.Status500InternalServerError);
     }
 
-    public static async Task<IResult> Login(AuthenticateUserCommand command, ISender sender)
+    public async Task<IResult> Login(AuthenticateUserCommand command, ISender sender)
     {
         OperationResult<AuthViewModel> operationResult;
 

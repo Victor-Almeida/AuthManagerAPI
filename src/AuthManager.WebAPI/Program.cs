@@ -4,8 +4,9 @@ using AuthManager.Application;
 using AuthManager.Domain;
 using AuthManager.Infrastructure;
 using AuthManager.Persistence;
-using AuthManager.WebAPI.Endpoints;
 using AuthManager.WebAPI.Setup;
+using Carter;
+using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,12 +25,14 @@ builder
 
 builder
     .Services
-    .AddAuthorizationBuilder()
-    .AddPolicy("Admin", policy =>
-        policy.RequireRole("Admin"));
-
-builder
-    .Services
+    .AddAuthorization(options => 
+    {
+        options.AddPolicy("Bearer", new AuthorizationPolicyBuilder()
+            .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+            .RequireAuthenticatedUser()
+            .Build());
+    })
+    .AddCarter()
     .AddEndpointsApiExplorer()
     .AddSwaggerGen(options =>
     {
@@ -46,7 +49,7 @@ builder
             In = ParameterLocation.Header,
             Name = "Authorization",
             Scheme = "Bearer",
-            Type = SecuritySchemeType.Http
+            Type = SecuritySchemeType.ApiKey
         });
 
         options.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -73,18 +76,17 @@ builder.Services
 
 var app = builder.Build();
 
-app.MapAdminEndpoints();
-app.MapAccountEndpoints();
-app.MapAuthEndpoints();
-
 if (app.Environment.IsProduction())
 {
     app.UseHttpsRedirection();
 }
-else
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+
+app
+    .UseSwagger()
+    .UseSwaggerUI()
+    .UseAuthentication()
+    .UseAuthorization();
+
+app.MapCarter();
 
 app.Run();

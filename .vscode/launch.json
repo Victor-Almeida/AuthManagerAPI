@@ -17,7 +17,9 @@
                 "uriFormat": "%s/swagger"
             },
             "env": {
-                "ASPNETCORE_ENVIRONMENT": "Development"
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "ASPNETCORE_URLS": "http://localhost:5000",
+                "CONNECTION_STRING": "Server=localhost\\sqlserver_dev,5434;Database=IdentityDb;User Id=SA;Password=Pass@word;Integrated security=False;TrustServerCertificate=True;"
             },
             "sourceFileMap": {
                 "/Views": "${workspaceFolder}/Views"

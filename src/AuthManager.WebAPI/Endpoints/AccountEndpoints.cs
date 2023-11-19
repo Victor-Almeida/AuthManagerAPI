@@ -2,19 +2,24 @@
 using AuthManager.Application.Account.CreateAccount;
 using AuthManager.Application.ViewModels;
 using AuthManager.Domain.Primitives;
+using Carter;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AuthManager.WebAPI.Endpoints;
 
-public static class AccountEndpoints
+public class AccountEndpoints : ICarterModule
 {
-    public static void MapAccountEndpoints(this IEndpointRouteBuilder app)
+    public void AddRoutes(IEndpointRouteBuilder app)
     {
         var group = app
             .MapGroup("api/accounts")
             .WithTags("Accounts");
 
         group
-            .MapPost("", async (CreateAccountCommand command, ISender sender) => await CreateAccount(command, sender))
+            .MapPost(
+                "",
+                [AllowAnonymous]
+                async (CreateAccountCommand command, ISender sender) => await CreateAccount(command, sender))
             .WithOpenApi(operation => new(operation)
             {
                 Summary = "Create an account",
@@ -26,7 +31,7 @@ public static class AccountEndpoints
             .Produces<OperationResult>(StatusCodes.Status500InternalServerError);
     }
 
-    public static async Task<IResult> CreateAccount(CreateAccountCommand command, ISender sender)
+    public async Task<IResult> CreateAccount(CreateAccountCommand command, ISender sender)
     {
         OperationResult<AuthViewModel> operationResult;
 

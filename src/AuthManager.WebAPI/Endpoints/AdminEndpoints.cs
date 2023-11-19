@@ -4,20 +4,24 @@ using AuthManager.Application.Admin.GetRoles;
 using AuthManager.Domain.Identity.Entities;
 using AuthManager.Domain.Primitives;
 using AuthManager.Application.Admin.AssignRoleToAccount;
+using Carter;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AuthManager.WebAPI.Endpoints;
 
-public static class AdminEndpoints
+public class AdminEndpoints : ICarterModule
 {
-    public static void MapAdminEndpoints(this IEndpointRouteBuilder app)
+    public void AddRoutes(IEndpointRouteBuilder app)
     {
         var group = app
             .MapGroup("api/admin")
             .WithTags("Admin");
 
         group
-            .MapPost("accounts/{accountId}/roles/{roleId}", async ([AsParameters] AssignRoleToAccountCommand command, ISender sender) => await AssignRoleToAccount(command, sender))
-            .RequireAuthorization("Admin")
+            .MapPost(
+                "accounts/{accountId}/roles/{roleId}", 
+                [Authorize(Roles = "Admin")] 
+                async ([AsParameters] AssignRoleToAccountCommand command, ISender sender) => await AssignRoleToAccount(command, sender))
             .WithOpenApi(operation => new(operation)
             {
                 Summary = "Assign role to account",
@@ -29,8 +33,10 @@ public static class AdminEndpoints
             .Produces<OperationResult>(StatusCodes.Status500InternalServerError);
 
         group
-            .MapPost("roles", async (CreateRoleCommand command, ISender sender) => await CreateRole(command, sender))
-            .RequireAuthorization("Admin")
+            .MapPost(
+                "roles", 
+                [Authorize(Roles = "Admin")] 
+                async (CreateRoleCommand command, ISender sender) => await CreateRole(command, sender))
             .WithOpenApi(operation => new(operation)
             {
                 Summary = "Create a role",
@@ -42,8 +48,10 @@ public static class AdminEndpoints
             .Produces<OperationResult>(StatusCodes.Status500InternalServerError);
 
         group
-            .MapGet("roles", async ([AsParameters] GetRolesQuery query, ISender sender) => await GetRoles(query, sender))
-            .RequireAuthorization("Admin")
+            .MapGet(
+                "roles",
+                [Authorize(Roles = "Admin")]
+                async ([AsParameters] GetRolesQuery query, ISender sender) => await GetRoles(query, sender))
             .WithOpenApi(operation => new(operation)
             {
                 Summary = "Get roles",
@@ -54,7 +62,7 @@ public static class AdminEndpoints
             .Produces<OperationResult>(StatusCodes.Status500InternalServerError);
     }
 
-    public static async Task<IResult> AssignRoleToAccount(AssignRoleToAccountCommand command, ISender sender)
+    public async Task<IResult> AssignRoleToAccount(AssignRoleToAccountCommand command, ISender sender)
     {
         OperationResult operationResult;
 
@@ -75,7 +83,7 @@ public static class AdminEndpoints
         return Results.BadRequest(operationResult);
     }
 
-    public static async Task<IResult> CreateRole(CreateRoleCommand command, ISender sender)
+    public async Task<IResult> CreateRole(CreateRoleCommand command, ISender sender)
     {
         OperationResult operationResult;
 
@@ -96,7 +104,7 @@ public static class AdminEndpoints
         return Results.BadRequest(operationResult);
     }
 
-    public static async Task<IResult> GetRoles(GetRolesQuery query, ISender sender)
+    public async Task<IResult> GetRoles(GetRolesQuery query, ISender sender)
     {
         OperationResult<PaginatedList<Role>> operationResult;
 

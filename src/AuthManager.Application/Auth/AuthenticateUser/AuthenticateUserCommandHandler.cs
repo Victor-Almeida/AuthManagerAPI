@@ -44,9 +44,9 @@ public sealed class AuthenticateUserCommandHandler : IRequestHandler<Authenticat
             return result.AddValidationErrorMessage("Invalid password");
 
         IList<string> userRoles = await _userManager.GetRolesAsync(user);
-
         string authenticationToken = _authService.GenerateToken(user, userRoles);
+        AuthViewModel viewModel = new(authenticationToken, user.Id, user.UserName!);
 
-        return result.SetData(new AuthViewModel(authenticationToken, user.Id, user.UserName!));
+        return result.SetData(viewModel);
     }
 }

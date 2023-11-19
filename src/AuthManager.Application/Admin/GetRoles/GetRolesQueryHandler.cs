@@ -28,15 +28,13 @@ public sealed class GetRolesQueryHandler : IRequestHandler<GetRolesQuery, Operat
     /// </returns>
     public async Task<OperationResult<PaginatedList<Role>>> Handle(GetRolesQuery request, CancellationToken cancellationToken)
     {
-        OperationResult<PaginatedList<Role>> result = new();
+        var roles = await _roleManager
+            .Roles
+            .ToPaginatedListAsync(
+                request.Page,
+                request.PageSize,
+                cancellationToken);
 
-        PaginatedList<Role> roles = await _roleManager.Roles.ToPaginatedListAsync(
-            request.Page,
-            request.PageSize,
-            cancellationToken);
-
-        result.Data = roles;
-
-        return result;
+        return OperationResult<PaginatedList<Role>>.Success(roles);
     }
 }

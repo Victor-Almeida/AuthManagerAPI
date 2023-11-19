@@ -1,4 +1,5 @@
-﻿using AuthManager.Domain.Identity.Entities;
+﻿using AuthManager.Domain.Enums;
+using AuthManager.Domain.Identity.Entities;
 using AuthManager.Domain.Primitives;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
@@ -23,8 +24,11 @@ internal sealed class AssignRoleToAccountCommandHandler : IRequestHandler<Assign
         var role = await _roleManager.FindByIdAsync(command.RoleId.ToString());
         var user = await _userManager.FindByIdAsync(command.AccountId.ToString());
 
-        result.IsNull(role, "Role not found");
-        result.IsNull(user, "Account not found");
+        if (role is null)
+            result.AddValidationErrorMessage("Role not found");
+
+        if (user is null)
+            result.AddValidationErrorMessage("Account not found");
 
         if (result.IsNotValid)
             return result;

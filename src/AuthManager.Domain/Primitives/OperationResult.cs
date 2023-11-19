@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Text.Json.Serialization;
+using AuthManager.Domain.Enums;
 
 namespace AuthManager.Domain.Primitives;
 
@@ -35,6 +36,30 @@ public class OperationResult
     {
         ErrorMessages = new List<string>();
         StatusCode = HttpStatusCode.OK;
+    }
+
+    public static OperationResult Success() => new();
+
+    public static OperationResult Failure(FailureTypeEnum failureType, string message)
+    {
+        var result = new OperationResult();
+
+        return failureType switch
+        {
+            FailureTypeEnum.Validation => result.AddValidationErrorMessage(message),
+            _ => result.AddInternalErrorMessage(message),
+        };
+    }
+
+    public static OperationResult Failure(FailureTypeEnum failureType, IEnumerable<string> messages)
+    {
+        var result = new OperationResult();
+
+        return failureType switch
+        {
+            FailureTypeEnum.Validation => result.AddValidationErrorMessages(messages),
+            _ => result.AddInternalErrorMessages(messages),
+        };
     }
 
     /// <summary>
@@ -88,42 +113,6 @@ public class OperationResult
 
         StatusCode = statusCode;
     }
-
-    public void IsNull(object? obj, string validationErrorMessage)
-    {
-        if (obj is null)
-            AddValidationErrorMessage(validationErrorMessage);
-    }
-
-    public void IsNull(string? str, string validationErrorMessage)
-    {
-        if (string.IsNullOrEmpty(str))
-            AddValidationErrorMessage(validationErrorMessage);
-    }
-
-    public void IsNotNull(object? obj, string validationErrorMessage)
-    {
-        if (obj is not null)
-            AddValidationErrorMessage(validationErrorMessage);
-    }
-
-    public void IsNotNull(string? str, string validationErrorMessage)
-    {
-        if (string.IsNullOrEmpty(str) is false)
-            AddValidationErrorMessage(validationErrorMessage);
-    }
-
-    public void IsTrue(bool condition, string validationErrorMessage)
-    {
-        if (condition)
-            AddValidationErrorMessage(validationErrorMessage);
-    }
-
-    public void IsFalse(bool condition, string validationErrorMessage)
-    {
-        if (condition is false)
-            AddValidationErrorMessage(validationErrorMessage);
-    }
 }
 
 /// <summary>
@@ -142,6 +131,10 @@ public class OperationResult<T> : OperationResult
     {
         Data = data;
     }
+
+    private static new OperationResult Success() => new();
+
+    public static OperationResult<T> Success(T data) => new(data);
 
     /// <summary>
     /// Adds an internal error message to the result in case of an unsuccessful operation. Makes the result invalid.
@@ -188,7 +181,7 @@ public class OperationResult<T> : OperationResult
     /// <summary>
     /// A monad method to set the result data for practicity purposes.
     /// </summary>
-    public OperationResult<T> SetData(T? data)
+    public OperationResult<T> SetData(T data)
     {
         Data = data;
 
