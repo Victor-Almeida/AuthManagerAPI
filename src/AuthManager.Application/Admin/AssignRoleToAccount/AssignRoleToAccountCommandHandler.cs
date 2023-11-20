@@ -1,4 +1,4 @@
-﻿using AuthManager.Domain.Enums;
+﻿using System.Security.Claims;
 using AuthManager.Domain.Identity.Entities;
 using AuthManager.Domain.Primitives;
 using MediatR;
@@ -33,16 +33,21 @@ internal sealed class AssignRoleToAccountCommandHandler : IRequestHandler<Assign
         if (result.IsNotValid)
             return result;
 
-        var userRoles = await _userManager.GetRolesAsync(user!);
+        IdentityResult roleAssignmentResult = await _userManager.AddToRoleAsync(user!, role!.Name!);
 
-        if (userRoles.Any(x => x == role!.Name))
-            return result.AddValidationErrorMessage("Account already has the specified role");
+        if (roleAssignmentResult.Succeeded is false) 
+            return result.AddValidationErrorMessages(roleAssignmentResult.Errors.Select(x => x.Description));
 
-        IdentityResult assignmentResult = await _userManager.AddToRoleAsync(user!, role!.Name!);
+        Claim claim = new(ClaimTypes.Role, role!.Name!);
 
-        if (assignmentResult.Succeeded) 
-            return result;
+        IdentityResult claimAssignmentResult = await _userManager.AddClaimAsync(user!, claim);
 
-        return result.AddValidationErrorMessages(assignmentResult.Errors.Select(x => x.Description));
+        if (claimAssignmentResult.Succeeded is false)
+        {
+            await _userManager.RemoveFromRoleAsync(user!, role.Name!);
+            return result.AddValidationErrorMessages(claimAssignmentResult.Errors.Select(x => x.Description));
+        }
+
+        return result;
     }
 }

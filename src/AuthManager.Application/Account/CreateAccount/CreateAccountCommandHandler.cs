@@ -1,32 +1,34 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Identity;
-using AuthManager.Application.Auth.AuthenticateUser;
 using AuthManager.Application.ViewModels;
 using AuthManager.Domain.Identity.Entities;
 using AuthManager.Domain.Primitives;
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
+using AuthManager.Domain.Enums;
+using AuthManager.Application.Interfaces;
 
 namespace AuthManager.Application.Account.CreateAccount;
 
 internal sealed class CreateAccountCommandHandler : IRequestHandler<CreateAccountCommand, OperationResult<AuthViewModel>>
 {
-    private readonly ISender _sender;
+    private readonly IAuthService _authService;
     private readonly UserManager<User> _userManager;
 
     public CreateAccountCommandHandler(
-        ISender sender,
+        IAuthService authService,
         UserManager<User> userManager)
     {
-        _sender = sender;
+        _authService = authService;
         _userManager = userManager;
     }
 
     public async Task<OperationResult<AuthViewModel>> Handle(CreateAccountCommand command, CancellationToken cancellationToken)
     {
-        OperationResult<AuthViewModel> result = new();
-
         User? user = await _userManager.FindByEmailAsync(command.Email);
 
-        if (user is not null) return result.AddValidationErrorMessage("This e-mail is already in use.");
+        if (user is not null) 
+            return OperationResult<AuthViewModel>.Failure(FailureTypeEnum.Validation, "This e-mail is already in use.");
 
         user = new User()
         {
@@ -39,16 +41,37 @@ internal sealed class CreateAccountCommandHandler : IRequestHandler<CreateAccoun
         IdentityResult response = await _userManager.CreateAsync(user);
 
         if (response.Succeeded is false)
-            return result.AddValidationErrorMessages(response.Errors.Select(x => x.Description));
+            return OperationResult<AuthViewModel>.Failure(FailureTypeEnum.Validation, response.Errors.Select(x => x.Description));
 
         response = await _userManager.AddPasswordAsync(user, command.Password);
 
         if (response.Succeeded is false)
         {
             await _userManager.DeleteAsync(user);
-            return result.AddValidationErrorMessages(response.Errors.Select(x => x.Description));
+            return OperationResult<AuthViewModel>.Failure(FailureTypeEnum.Validation, response.Errors.Select(x => x.Description));
         }
 
-        return await _sender.Send(new AuthenticateUserCommand(command.Email, command.Password), cancellationToken);
+        var claims = new Claim[]
+        {
+            new(JwtRegisteredClaimNames.Email, user.Email!),
+            new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new(JwtRegisteredClaimNames.UniqueName, user.UserName!),
+        };
+
+        response = await _userManager.AddClaimsAsync(user, claims);
+
+        if (response.Succeeded is false)
+        {
+            await _userManager.DeleteAsync(user);
+            return OperationResult<AuthViewModel>.Failure(FailureTypeEnum.Validation, response.Errors.Select(x => x.Description));
+        }
+
+        AuthViewModel viewModel = new(
+            _authService.GenerateToken(claims),
+            user.Id,
+            user.UserName
+        );
+
+        return OperationResult<AuthViewModel>.Success(viewModel);
     }
 }

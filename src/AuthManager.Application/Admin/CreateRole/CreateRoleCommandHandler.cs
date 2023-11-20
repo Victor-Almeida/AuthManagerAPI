@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Identity;
 using AuthManager.Domain.Identity.Entities;
 using AuthManager.Domain.Primitives;
+using AuthManager.Domain.Enums;
+using System.Security.Claims;
 
 namespace AuthManager.Application.Admin.CreateRole;
 
@@ -26,23 +28,26 @@ public sealed class CreateRoleCommandHandler : IRequestHandler<CreateRoleCommand
     /// </returns>
     public async Task<OperationResult> Handle(CreateRoleCommand request, CancellationToken cancellationToken)
     {
-        OperationResult result = new();
-
         Role? role = await _roleManager.FindByNameAsync(request.RoleName);
 
-        if (role is not null) return result.AddValidationErrorMessage("This role already exists.");
+        if (role is not null) 
+            return OperationResult.Failure(FailureTypeEnum.Validation, "This role already exists.");
 
         role = new Role()
         {
-            Name = request.RoleName,
-            NormalizedName = request.RoleName.ToLower()
+            Name = request.RoleName
         };
 
         IdentityResult response = await _roleManager.CreateAsync(role);
 
         if (response.Succeeded is false)
-            return result.AddValidationErrorMessages(response.Errors.Select(x => x.Description));
+            return OperationResult.Failure(FailureTypeEnum.Validation, response.Errors.Select(x => x.Description));
 
-        return result;
+        // response = await _roleManager.AddClaimAsync(role!, new Claim(ClaimTypes.Role, role!.Name!));
+
+        // if (response.Succeeded is false)
+        //     return OperationResult.Failure(FailureTypeEnum.Validation, response.Errors.Select(x => x.Description));
+
+        return OperationResult.Success();
     }
 }

@@ -6,7 +6,7 @@ using System.Text;
 
 namespace AuthManager.WebAPI.Setup
 {
-    public sealed class JwtBearerOptionsSetup : IConfigureOptions<JwtBearerOptions>
+    public sealed class JwtBearerOptionsSetup : IConfigureNamedOptions<JwtBearerOptions>
     {
         private readonly AuthOptions _authOptions;
 
@@ -19,18 +19,24 @@ namespace AuthManager.WebAPI.Setup
         {
             options.Audience = _authOptions.Audience;
             options.Authority = _authOptions.Issuer;
+            options.RequireHttpsMetadata = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production";
             options.SaveToken = true;
             options.TokenValidationParameters = new()
             {
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_authOptions.SecretKey)),
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_authOptions.SecretKey)),
                 RequireSignedTokens = true,
                 ValidateAudience = true,
                 ValidateIssuer = true,
                 ValidateIssuerSigningKey = true,
                 ValidateLifetime = true,
                 ValidAudience = _authOptions.Audience,
-                ValidIssuer = _authOptions.Issuer,
+                ValidIssuer = _authOptions.Issuer
             };
+        }
+
+        public void Configure(string? name, JwtBearerOptions options)
+        {
+            Configure(options);
         }
     }
 }

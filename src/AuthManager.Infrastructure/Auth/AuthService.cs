@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using AuthManager.Application.Interfaces;
-using AuthManager.Domain.Identity.Entities;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -17,32 +16,24 @@ internal sealed class AuthService : IAuthService
         _authOptions = authOptions.Value;
     }
 
-    public string GenerateToken(User user, IEnumerable<string> userRoles)
+    public string GenerateToken(IEnumerable<Claim> claims)
     {
-        SymmetricSecurityKey securityKey = new(Encoding.ASCII.GetBytes(_authOptions.SecretKey));
+        JwtSecurityTokenHandler tokenHandler = new();
+        SymmetricSecurityKey securityKey = new(Encoding.UTF8.GetBytes(_authOptions.SecretKey));
         SigningCredentials credentials = new(securityKey, SecurityAlgorithms.HmacSha256);
 
-        var claims = new List<Claim>
+        var tokenDescriptor = new SecurityTokenDescriptor
         {
-            new(JwtRegisteredClaimNames.Email, user.Email!),
-            new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new(JwtRegisteredClaimNames.UniqueName, user.UserName!),
+            Audience = _authOptions.Audience,
+            Expires = DateTime.UtcNow.AddMinutes(60),
+            IssuedAt = DateTime.UtcNow,
+            Issuer = _authOptions.Issuer,
+            SigningCredentials = credentials,
+            Subject = new ClaimsIdentity(claims)            
         };
-
-        foreach (var role in userRoles)
-        {
-            var claim = new Claim(ClaimTypes.Role, role);
-            claims.Add(claim);
-        }
-
-        JwtSecurityToken token = new(
-            _authOptions.Issuer,
-            _authOptions.Audience,
-            claims,
-            expires: DateTime.UtcNow.AddMinutes(60),
-            signingCredentials: credentials);
-
-        string bearerToken = new JwtSecurityTokenHandler().WriteToken(token);
+        
+        var token = tokenHandler.CreateToken(tokenDescriptor);
+        var bearerToken = tokenHandler.WriteToken(token);
 
         return bearerToken;
     }

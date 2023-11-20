@@ -199,6 +199,12 @@ namespace AuthManager.Persistence.Migrations
             migrationBuilder.Sql(@"INSERT INTO AspNetUsers (Id, UserName, NormalizedUserName, Email, NormalizedEmail, EmailConfirmed, PasswordHash, SecurityStamp, ConcurrencyStamp, PhoneNumberConfirmed, TwoFactorEnabled, LockoutEnabled, AccessFailedCount) 
                                    VALUES ('80F680AB-F3FC-4A99-BF33-08DBD8DBD0C7', 'Admin', 'ADMIN', 'admin@admin.com', 'ADMIN@ADMIN.COM', 1, 'AQAAAAIAAYagAAAAEL5f/VOUOMjksjl3FCgwKoMqNIrjLLgVyVuvybVXc474n+0cHghlZBKsZZl63pIPqw==', 'YFGKB6NFQZSFM62ME55XHLEHIHWGUGIX', '69836c65-12f8-4cfb-a18f-d3144e089533', 0, 0, 1, 0)");
             migrationBuilder.Sql("INSERT INTO AspNetUserRoles (UserId, RoleId) VALUES ('80F680AB-F3FC-4A99-BF33-08DBD8DBD0C7', '7AFABFB9-E907-42B5-369E-08DBD8DBC2C1')");
+            migrationBuilder.Sql(@"INSERT INTO AspNetUserClaims(UserId, ClaimType, ClaimValue)
+                                   VALUES 
+                                       ('80F680AB-F3FC-4A99-BF33-08DBD8DBD0C7', 'email', 'admin@admin.com'),
+                                       ('80F680AB-F3FC-4A99-BF33-08DBD8DBD0C7', 'sub', '80F680AB-F3FC-4A99-BF33-08DBD8DBD0C7'),
+                                       ('80F680AB-F3FC-4A99-BF33-08DBD8DBD0C7', 'unique_name', 'Admin'),
+                                       ('80F680AB-F3FC-4A99-BF33-08DBD8DBD0C7', 'http://schemas.microsoft.com/ws/2008/06/identity/claims/role', 'Admin')");
         }
 
         /// <inheritdoc />

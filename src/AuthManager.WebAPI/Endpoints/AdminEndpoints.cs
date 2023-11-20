@@ -27,7 +27,6 @@ public class AdminEndpoints : ICarterModule
                 Summary = "Assign role to account",
                 Description = "Assigns a role to an existing acccount"
             })
-            .Accepts<AssignRoleToAccountCommand>("application/json")
             .Produces(StatusCodes.Status200OK)
             .Produces<OperationResult>(StatusCodes.Status400BadRequest)
             .Produces<OperationResult>(StatusCodes.Status500InternalServerError);

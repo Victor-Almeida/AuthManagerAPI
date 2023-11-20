@@ -1,8 +1,8 @@
-using AuthManager.Domain.Identity.Entities;
+using System.Security.Claims;
 
 namespace AuthManager.Application.Interfaces;
 
 public interface IAuthService
 {
-    string GenerateToken(User user, IEnumerable<string> userRoles);
+    string GenerateToken(IEnumerable<Claim> claims);
 }

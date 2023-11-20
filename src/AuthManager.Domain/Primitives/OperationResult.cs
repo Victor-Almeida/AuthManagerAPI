@@ -133,8 +133,31 @@ public class OperationResult<T> : OperationResult
     }
 
     private static new OperationResult Success() => new();
+    //private static new OperationResult Failure(FailureTypeEnum failureType, string message) => new();
 
     public static OperationResult<T> Success(T data) => new(data);
+
+    public new static OperationResult<T> Failure(FailureTypeEnum failureType, string message)
+    {
+        var result = new OperationResult<T>();
+
+        return failureType switch
+        {
+            FailureTypeEnum.Validation => result.AddValidationErrorMessage(message),
+            _ => result.AddInternalErrorMessage(message),
+        };
+    }
+
+    public new static OperationResult<T> Failure(FailureTypeEnum failureType, IEnumerable<string> messages)
+    {
+        var result = new OperationResult<T>();
+
+        return failureType switch
+        {
+            FailureTypeEnum.Validation => result.AddValidationErrorMessages(messages),
+            _ => result.AddInternalErrorMessages(messages),
+        };
+    }
 
     /// <summary>
     /// Adds an internal error message to the result in case of an unsuccessful operation. Makes the result invalid.
