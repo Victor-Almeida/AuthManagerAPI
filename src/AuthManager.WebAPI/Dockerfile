@@ -3,24 +3,22 @@
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
 EXPOSE 80
-EXPOSE 443
 
 ENV ASPNETCORE_ENVIRONMENT=Development
-ENV ASPNETCORE_URLS=https://+:443;http://+:80   
 ENV CONNECTION_STRING="Server=sqlserver_dev;Database=IdentityDb;User Id=SA;Password=Pass@word;Integrated security=False;TrustServerCertificate=True;"
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY ["AuthManagerAPI/AuthManager.WebAPI.csproj", "AuthManagerAPI/"]
-RUN dotnet restore "AuthManagerAPI/AuthManager.WebAPI.csproj"
+COPY ["AuthManager.WebAPI/AuthManager.WebAPI.csproj", "AuthManager.WebAPI/"]
+RUN dotnet restore "AuthManager.WebAPI/AuthManager.WebAPI.csproj"
 COPY . .
-WORKDIR "/src/AuthManagerAPI"
+WORKDIR "/src/AuthManager.WebAPI"
 RUN dotnet build "AuthManager.WebAPI.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "AuthManager.WebAPI.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "AuthManager.WebAPI.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "AuthManager.WebAPI.dll", "--urls", "http://*:5000;https://*:5001"]
+ENTRYPOINT ["dotnet", "AuthManager.WebAPI.dll"]
